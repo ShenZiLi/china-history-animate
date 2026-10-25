@@ -37,5 +37,9 @@ desktop.ini
 *.tmp
 *.bak
 
+# 渲染中间产物（可重新生成）
+frames/
+build/
+
 # Agent 工作数据
 .workbuddy/

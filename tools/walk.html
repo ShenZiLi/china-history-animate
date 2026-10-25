@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>步态检查</title>
+<style>html,body{margin:0;background:#d9d2c2}canvas{display:block;width:100vw}</style></head>
+<body>
+<canvas id="c" width="1800" height="1000"></canvas>
+<script type="module">
+import { drawWalker, walkerJoints } from '../src/rig/walker.js';
+import { text } from '../src/kit/draw.js';
+const c = document.getElementById('c');
+const g = c.getContext('2d');
+g.fillStyle = '#d9d2c2'; g.fillRect(0, 0, 1800, 1000);
+
+const S = { mode:'fill', cloth:'#4f3220', clothAlt:'#42281a', skin:'#c9a184', line:'#2a1c12', robe:true, hat:'bun', sleeve:0.6, accent:'#a83c28', lw:2 };
+const N = 5;
+for (let i = 0; i < N; i++) {
+  const x = 170 + i * 350;
+  const ground = 880;
+  g.save();
+  g.strokeStyle = 'rgba(0,0,0,.2)';
+  g.beginPath(); g.moveTo(x - 150, ground); g.lineTo(x + 150, ground); g.stroke();
+  drawWalker(g, x, ground, i / N, S);
+  const J = walkerJoints(x, ground, i / N, undefined, S);
+  const dot = (p, col) => { g.fillStyle = col; g.beginPath(); g.arc(p[0], p[1], 4, 0, Math.PI * 2); g.fill(); };
+  dot(J.head, '#f00'); dot(J.shoulder, '#00f'); dot(J.hip, '#0a0');
+  dot(J.armNear.elbow, '#f80'); dot(J.armNear.hand, '#fa0');
+  dot(J.legNear.knee, '#0aa'); dot(J.legNear.ankle, '#a0a');
+  g.restore();
+  text(g, 'phase ' + (i / N).toFixed(2), x - 36, ground + 40, { size: 16, color: '#444', font: 'mono' });
+}
+text(g, 'robe / fill / bun', 20, 40, { size: 18, color: '#333', font: 'sans' });
+window.__ready = true;
+window.__galleryDataURL = () => c.toDataURL('image/png');
+</script>
+</body></html>

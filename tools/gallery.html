@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>场景检查表</title>
+<style>
+  html, body { margin: 0; background: #1a1714; }
+  canvas { display: block; width: 100vw; height: auto; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script type="module">
+import { renderFrame, setRegistry, W, H } from '../src/main/film.js';
+import { SCENES, TOTAL } from '../src/main/timeline.js';
+import { loadRegistry } from '../src/scenes/index.js';
+import { text } from '../src/kit/draw.js';
+
+const params = new URLSearchParams(location.search);
+const single = params.get('i');
+
+const main = document.getElementById('c');
+const mctx = main.getContext('2d');
+mctx.fillStyle = '#1a1714';
+mctx.fillRect(0, 0, W, H);
+
+const reg = await loadRegistry();
+setRegistry(reg);
+
+if (single != null) {
+  const i = parseInt(single, 10);
+  const sc = SCENES[i];
+  const t = parseFloat(params.get('t') || (sc.start + sc.dur * 0.55));
+  renderFrame(mctx, t);
+  window.__galleryDataURL = () => main.toDataURL('image/jpeg', 0.92);
+  window.__ready = true;
+} else {
+  const off = document.createElement('canvas');
+  off.width = W; off.height = H;
+  const octx = off.getContext('2d');
+  const cols = 6, rows = 4, tw = 312, th = 175, gap = 8;
+  const x0 = (W - (cols * tw + (cols - 1) * gap)) / 2;
+  const y0 = 92;
+
+  text(mctx, '一步千年 · 24 版块检查表', x0, 56, { size: 26, color: '#e8dcc8', font: 'serif', spacing: 2 });
+
+  for (let i = 0; i < 24; i++) {
+    const sc = SCENES[i];
+    const t = sc.start + sc.dur * 0.55;
+    renderFrame(octx, t);
+    const col = i % cols, row = (i / cols) | 0;
+    const x = x0 + col * (tw + gap), y = y0 + row * (th + gap);
+    mctx.drawImage(off, 0, 0, W, H, x, y, tw, th);
+    mctx.strokeStyle = 'rgba(232,220,200,0.28)';
+    mctx.lineWidth = 1;
+    mctx.strokeRect(x + 0.5, y + 0.5, tw - 1, th - 1);
+    text(mctx, `${String(i + 1).padStart(2, '0')} ${sc.cn}`, x + 4, y + th + 15, { size: 11, color: '#b9ab95', font: 'sans' });
+    text(mctx, `${sc.start.toFixed(0)}s`, x + tw - 4, y + th + 15, { size: 10, color: '#7d7264', font: 'mono', align: 'right' });
+  }
+  text(mctx, `总时长 ${TOTAL}s · 1920×1080`, W - x0, 56, { size: 13, color: '#7d7264', font: 'mono', align: 'right' });
+  window.__galleryDataURL = () => main.toDataURL('image/jpeg', 0.92);
+  window.__ready = true;
+}
+</script>
+</body>
+</html>
