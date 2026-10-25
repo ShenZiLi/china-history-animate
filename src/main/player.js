@@ -192,6 +192,7 @@ async function boot() {
         return state.ctx.canvas.toDataURL('image/jpeg', 0.9);
       };
       window.__info = () => ({ total: TOTAL, fps: FPS, w: W, h: H, scenes: SCENES });
+      window.__audio = () => (state.buffer ? { duration: state.buffer.duration, sampleRate: state.buffer.sampleRate } : null);
       window.__ready = true;
     };
   }, document.getElementById('stage'));
