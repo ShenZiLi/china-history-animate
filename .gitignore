@@ -36,3 +36,6 @@ desktop.ini
 # 临时文件
 *.tmp
 *.bak
+
+# Agent 工作数据
+.workbuddy/
