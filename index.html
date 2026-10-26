@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#181b19" />
+    <title>一步千年 · 步行长卷</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="masthead">
+        <a class="wordmark" href="/" aria-label="一步千年首页"
+          ><span class="seal">步</span
+          ><span>一步千年<small>A WALK THROUGH TIME</small></span></a
+        >
+        <span class="edition"
+          ><span class="status-dot"></span>阶段 01 · 无声结构预演</span
+        >
+      </header>
+      <main>
+        <div class="heading">
+          <div>
+            <p class="eyebrow">一位普通行者的非普通散步</p>
+            <h1>脚步没有停，<span>山河已千年。</span></h1>
+          </div>
+          <p class="film-meta">
+            24 个时代 / 一条路<span>03:11 · 120 BPM · 16:9</span>
+          </p>
+        </div>
+        <div class="workspace">
+          <section class="player" aria-label="动画播放器">
+            <div
+              id="film"
+              role="img"
+              aria-label="同一位行者沿道路穿过二十四个时代的代码动画"
+            ></div>
+            <div class="transport">
+              <label class="sr-only" for="scrubber">播放进度，秒</label
+              ><input
+                id="scrubber"
+                type="range"
+                min="0"
+                max="191"
+                step="any"
+                value="0"
+              />
+              <div class="controls">
+                <div class="control-group">
+                  <button id="play" class="play" aria-label="播放">
+                    播放 <span aria-hidden="true">▶</span></button
+                  ><button
+                    id="restart"
+                    class="text-button"
+                    aria-label="从头播放"
+                  >
+                    从头</button
+                  ><output id="clock">00:00 / 03:11</output>
+                </div>
+                <div class="control-group">
+                  <button
+                    id="previous-frame"
+                    class="icon-button"
+                    aria-label="上一帧"
+                  >
+                    Ⅰ‹</button
+                  ><button
+                    id="next-frame"
+                    class="icon-button"
+                    aria-label="下一帧"
+                  >
+                    ›Ⅰ</button
+                  ><label class="sr-only" for="speed">播放速度</label
+                  ><select id="speed">
+                    <option value="0.5">0.5×</option>
+                    <option value="1" selected>1×</option>
+                    <option value="1.5">1.5×</option></select
+                  ><button id="fullscreen" class="text-button">全屏</button>
+                </div>
+              </div>
+            </div>
+            <div class="now-playing">
+              <span class="current-marker"></span>
+              <div>
+                <strong id="current-title">序 · 路比名字更早</strong
+                ><span id="current-subtitle">Intro</span>
+              </div>
+              <span id="beat-label">弱起</span>
+            </div>
+          </section>
+          <aside class="chapters">
+            <div class="chapter-heading">
+              <h2>长卷索引</h2>
+              <span>CHAPTERS</span>
+            </div>
+            <nav id="chapter-list" aria-label="时代章节"></nav>
+          </aside>
+        </div>
+        <div class="below">
+          <p>
+            此版检验步态、穿框与时间结构。各时代为标名占位画面，美术与声音将在后续阶段制作。
+          </p>
+          <p>空格 播放 / 暂停 <span>← → 前后 5 秒</span></p>
+        </div>
+        <details class="inspection">
+          <summary>动作检查</summary>
+          <label
+            ><input id="rig-overlay" type="checkbox" /> 显示骨骼与触地点</label
+          ><label><input id="hide-titles" type="checkbox" /> 隐藏时代标题</label
+          ><output id="diagnostics"></output>
+          <p>
+            支撑点以世界坐标锁定；帧检查按 60fps
+            采样，正式输出帧率待对比后确认。
+          </p>
+        </details>
+      </main>
+      <footer>
+        <span>一步千年 · 原创代码动画</span><span>过去 / 今天 / 未来</span>
+      </footer>
+    </div>
+    <script type="module" src="/src/main/app.js"></script>
+  </body>
+</html>
