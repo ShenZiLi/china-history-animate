@@ -14,7 +14,8 @@
     "capture": "node tools/capture.mjs",
     "capture:stage2": "node tools/stage-two.mjs",
     "render": "node tools/render.mjs",
-    "verify": "node tools/verify.mjs"
+    "verify": "node tools/verify.mjs",
+    "capture:revision": "node tools/reference-revision.mjs"
   },
   "dependencies": {
     "p5": "2.3.4"

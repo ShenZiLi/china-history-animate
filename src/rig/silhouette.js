@@ -118,6 +118,30 @@ function texture(ctx, path, pose, style) {
   const pale = style.paper;
   ctx.fillStyle = pale;
   ctx.strokeStyle = pale;
+  if (style.plate) {
+    // Pigment is attached to the moving body, rather than screen-space noise.
+    // Large enough to read in motion, with a different mark for each medium.
+    const stone = style.medium === "rock";
+    ctx.globalAlpha = stone ? 0.48 : 0.3;
+    for (let i = 0; i < (stone ? 1900 : 850); i++) {
+      const x = hash(i * 13 + 43) * 176 - 82;
+      const y = hash(i * 7 + 17) * 370 - 260;
+      const r = 0.25 + hash(i * 31) * (stone ? 1.1 : 0.65);
+      ctx.fillRect(x, y, r, r * (stone ? 0.85 : 2.6));
+    }
+    ctx.globalAlpha = stone ? 0.38 : 0.26;
+    ctx.lineWidth = stone ? 1.5 : 1;
+    ctx.lineCap = "round";
+    for (let i = 0; i < 3; i++) {
+      const y = -72 + i * 22;
+      ctx.beginPath();
+      ctx.moveTo(8, y);
+      ctx.quadraticCurveTo(14, y + 4, 21, y + 10);
+      ctx.stroke();
+    }
+    ctx.restore();
+    return;
+  }
   if (["ink", "wash", "dry-ink", "renewal"].includes(style.medium)) {
     const wash = ctx.createLinearGradient(-35, -100, 35, -60);
     wash.addColorStop(0, "rgba(245,242,232,0.02)");
@@ -208,7 +232,22 @@ export function drawSilhouette(ctx, pose, style, camera = 0) {
     .rotate(((pose.headTilt ?? 0) * 180) / Math.PI)
     .translate(-pose.head.x, -pose.head.y);
   shape.addPath(headPath, headMatrix);
+  if (style.plate) {
+    ctx.strokeStyle =
+      style.medium === "rock"
+        ? "#96704a"
+        : style.medium === "renewal"
+          ? "#ab985a"
+          : "#28372f";
+    ctx.lineWidth = style.medium === "rock" ? 1.2 : 1.4;
+    ctx.lineJoin = "round";
+    ctx.stroke(shape);
+  }
   ctx.fill(shape);
+  if (style.shadow) {
+    ctx.restore();
+    return;
+  }
   texture(ctx, shape, pose, style);
   ctx.fillStyle = style.accentColor;
   const h = pose.hip;

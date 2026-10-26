@@ -5,6 +5,7 @@ import {
   renderAt as draw,
   options,
   wallGeometry,
+  renderStudyAt,
 } from "./film.js";
 import {
   SCENES,
@@ -18,7 +19,13 @@ import {
   outroWalkTime,
 } from "../beat/timeline.js";
 import { poseAtWalkTime } from "../rig/walker.js";
-import { performanceAt as poseAt, viewAt, REFINED } from "./choreography.js";
+import { REFINED } from "./choreography.js";
+import {
+  galleryPerformanceAt,
+  galleryViewAt as viewAt,
+  plateManifest,
+} from "./gallery.js";
+const poseAt = (t) => galleryPerformanceAt(t).pose;
 import { artManifest } from "../kit/media.js";
 
 const $ = (s) => document.querySelector(s);
@@ -167,6 +174,8 @@ await mountFilm("film");
 await ready;
 render(Number(new URLSearchParams(location.search).get("t") ?? 0));
 window.film = {
+  renderStudyAt,
+  plateManifest,
   artManifest,
   ready: true,
   renderAt(t) {

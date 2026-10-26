@@ -46,8 +46,9 @@ await withFilm(async ({ page, errors, browser }) => {
   );
   assert.deepEqual(errors, []);
   const layers = await page.evaluate(() => window.film.artManifest());
+  const plates = await page.evaluate(() => window.film.plateManifest?.() ?? []);
   if (cli.deep) {
-    assert(layers.length >= 6, "三个精作场景各自至少需要两个图层");
+    assert.equal(plates.length, 3, "当前必须包含三个独立重做画幅");
     assert(layers.every((x) => x.loaded && x.width > 0 && x.height > 0));
   }
   const environmentMotion = [];
@@ -91,6 +92,7 @@ await withFilm(async ({ page, errors, browser }) => {
         wall: layout,
         chapters: coverage,
         layers,
+        plates,
         environmentMotion,
         errors,
       },

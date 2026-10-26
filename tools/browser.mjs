@@ -28,14 +28,18 @@ export async function withFilm(run) {
     await server.close();
   }
 }
-export async function frame(page, t) {
-  const base64 = await page.evaluate((t) => {
-    window.film.renderAt(t);
-    return document
-      .querySelector("canvas")
-      .toDataURL("image/png")
-      .split(",")[1];
-  }, t);
+export async function frame(page, t, study = false) {
+  const base64 = await page.evaluate(
+    ({ t, study }) => {
+      if (study) window.film.renderStudyAt(t);
+      else window.film.renderAt(t);
+      return document
+        .querySelector("canvas")
+        .toDataURL("image/png")
+        .split(",")[1];
+    },
+    { t, study },
+  );
   return Buffer.from(base64, "base64");
 }
 export function args() {

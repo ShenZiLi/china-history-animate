@@ -7,13 +7,13 @@ import { DURATION, frameCount, frameTime } from "../src/beat/timeline.js";
 const cli = args();
 const fps = Number(cli.fps ?? 30),
   from = Number(cli.from ?? 0),
-  to = Number(cli.to ?? DURATION);
+  to = Number(cli.to ?? (cli.study ? 22 : DURATION));
 if (
   ![30, 60].includes(fps) ||
   !Number.isFinite(from) ||
   !Number.isFinite(to) ||
   from < 0 ||
-  to > DURATION ||
+  to > (cli.study ? 22 : DURATION) ||
   to <= from
 )
   throw Error("要求 fps=30 或 60，且 0 ≤ from < to ≤ 191");
@@ -68,7 +68,11 @@ await withFilm(async ({ page, errors, browser }) => {
   ffmpeg.stdin.on("error", () => {});
   try {
     for (let i = 0; i < count; i++) {
-      const png = await frame(page, frameTime(i, fps, from));
+      const png = await frame(
+        page,
+        frameTime(i, fps, from),
+        Boolean(cli.study),
+      );
       if (frames)
         await writeFile(
           resolve(frames, `${String(i).padStart(6, "0")}.png`),
@@ -91,6 +95,7 @@ await withFilm(async ({ page, errors, browser }) => {
     JSON.stringify(
       {
         stage: Number(cli.stage ?? 1),
+        edition: cli.study ? "three-plate-study" : "full-film",
         silent: true,
         fps,
         from,

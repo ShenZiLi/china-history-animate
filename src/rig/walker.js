@@ -5,11 +5,16 @@ import { drawSilhouette } from "./silhouette.js";
 export const STANCE = 0.6;
 const THIGH = 82;
 const SHIN = 84;
-export function footAt(walkTime, side = 0, ground = () => GROUND) {
+export function footAt(
+  walkTime,
+  side = 0,
+  ground = () => GROUND,
+  speed = SPEED,
+) {
   const shifted = walkTime - side * 0.5;
   const cycle = Math.floor(shifted);
   const phase = shifted - cycle;
-  const contactX = SPEED * (cycle + side * 0.5 + STANCE / 2) + 3;
+  const contactX = speed * (cycle + side * 0.5 + STANCE / 2) + 3;
   if (phase < STANCE)
     return {
       x: contactX,
@@ -21,7 +26,7 @@ export function footAt(walkTime, side = 0, ground = () => GROUND) {
       toeLift: 10 * (1 - smooth(phase / 0.08)),
     };
   const u = (phase - STANCE) / (1 - STANCE);
-  const nextX = contactX + SPEED;
+  const nextX = contactX + speed;
   return {
     x: mix(contactX, nextX, smooth(u)),
     y:
@@ -49,9 +54,9 @@ export function solveKnee(hip, ankle) {
 export function poseAt(t, ground = () => GROUND) {
   return poseAtWalkTime(t - INTRO, ground);
 }
-export function poseAtWalkTime(walkTime, ground = () => GROUND) {
-  const rootX = walkTime * SPEED;
-  const feet = [0, 1].map((side) => footAt(walkTime, side, ground));
+export function poseAtWalkTime(walkTime, ground = () => GROUND, speed = SPEED) {
+  const rootX = walkTime * speed;
+  const feet = [0, 1].map((side) => footAt(walkTime, side, ground, speed));
   const ankles = feet.map((foot) => ({
     x: foot.x - 3,
     y: foot.y - 7 - foot.heelLift * 0.55 - foot.toeLift * 0.12,
@@ -72,7 +77,7 @@ export function poseAtWalkTime(walkTime, ground = () => GROUND) {
     return { side, foot, ankle, knee: solveKnee(hip, ankle), hip };
   });
   const arms = [0, 1].map((side) => {
-    const a = Math.sin(walkTime * Math.PI * 2 + side * Math.PI) * 0.44;
+    const a = Math.cos(walkTime * Math.PI * 2 + side * Math.PI) * 0.65;
     const elbow = {
       x: shoulder.x - Math.sin(a) * 51,
       y: shoulder.y + Math.cos(a) * 51,
@@ -81,8 +86,8 @@ export function poseAtWalkTime(walkTime, ground = () => GROUND) {
       shoulder,
       elbow,
       hand: {
-        x: elbow.x + Math.sin(-a * 0.6 + 0.22) * 44,
-        y: elbow.y + Math.cos(-a * 0.6 + 0.22) * 44,
+        x: elbow.x - Math.sin(a - 0.12) * 44,
+        y: elbow.y + Math.cos(a - 0.12) * 44,
       },
     };
   });
