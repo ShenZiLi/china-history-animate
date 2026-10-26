@@ -15,7 +15,7 @@ The animation, character rig, timing system, scene placeholders, and project-spe
 - **Chrome for Testing**, downloaded by Puppeteer — used as an external rendering tool; not committed or included in the built site. Its actual version is recorded by capture and verification outputs.
 - **ffmpeg** — externally installed encoder, not redistributed. The development machine reports 8.1.2 with GPL components enabled. <https://ffmpeg.org/legal.html>.
 
-Exact direct and transitive dependency versions are recorded in `package-lock.json`; each installed package retains its own license and notices. No external images, recordings, music, sound effects, logos, or voice samples are used. Stage 1 is silent.
+Exact direct and transitive dependency versions are recorded in `package-lock.json`; each installed package retains its own license and notices. No external images, recordings, music, sound effects, logos, or voice samples are used in the film. Stage 1 is silent. The four character direction boards under `design/character-concepts/` were generated using the built-in imagegen tool at the user's request; they are design references and are not embedded as frames in the animation.
 
 ## Reference reading
 
