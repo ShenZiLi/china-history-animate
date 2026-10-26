@@ -13,9 +13,12 @@ import {
   sceneAt,
   outroWalkTime,
 } from "../beat/timeline.js";
-import { poseAt, poseAtWalkTime, drawWalker } from "../rig/walker.js";
-import { drawPlaceholder, drawPortal } from "../scenes/placeholder.js";
+import { poseAtWalkTime, drawWalker } from "../rig/walker.js";
+import { drawScene, drawBoundary, projectContext } from "../scenes/index.js";
+import { renewalPortal } from "../scenes/renewal.js";
+import { performanceAt as poseAt, viewAt, REFINED } from "./choreography.js";
 import { paperTexture, text, path } from "../kit/draw.js";
+import { preloadArt } from "../kit/media.js";
 
 const ANCHOR = 740;
 export const options = { rig: false, titles: true };
@@ -26,13 +29,29 @@ export const ready = new Promise((resolve) => {
   readyResolve = resolve;
 });
 const tiles = new Map();
+let sceneLayer;
+function paintScene(scene, view, t, pose, shadow = true) {
+  if (!sceneLayer) {
+    sceneLayer = document.createElement("canvas");
+    sceneLayer.width = 1920;
+    sceneLayer.height = 1080;
+  }
+  const layer = sceneLayer.getContext("2d");
+  layer.save();
+  layer.setTransform(1.08, 0, 0, 1.08, 0, 0);
+  layer.clearRect(0, 0, WIDTH, HEIGHT);
+  layer.globalAlpha = 1;
+  drawScene(layer, scene, view, t, pose, shadow);
+  layer.restore();
+  ctx.drawImage(sceneLayer, 0, 0, WIDTH, HEIGHT);
+}
 
 function title(scene) {
   ctx.save();
   ctx.globalAlpha = 1;
   ctx.fillStyle = scene.paper;
   ctx.globalAlpha = 0.94;
-  ctx.fillRect(72, 56, 720, 219);
+  if (!REFINED.includes(scene.id)) ctx.fillRect(72, 56, 720, 219);
   ctx.globalAlpha = 1;
   text(
     ctx,
@@ -52,38 +71,85 @@ function title(scene) {
     21,
     scene.ink,
   );
-  text(ctx, `结构预演 · ${scene.portal}占位`, 96, 920, 19, scene.ink);
+  if (!REFINED.includes(scene.id))
+    text(ctx, `结构预演 · ${scene.portal}占位`, 96, 920, 19, scene.ink);
   ctx.restore();
 }
 function scroll(t, { titles = true, rig = false } = {}) {
   const pose = poseAt(t),
-    camera = pose.rootX - ANCHOR;
-  for (const scene of SCENES) {
-    const left = scene.index === 0 ? -WIDTH : scene.worldStart - camera;
-    const right = scene.index === 23 ? WIDTH * 2 : scene.worldEnd - camera;
-    if (right < 0 || left > WIDTH) continue;
+    view = viewAt(t),
+    active = sceneAt(t);
+  const clipScene = (scene, run) => {
+    const left =
+      scene.index === 0 ? 0 : Math.max(0, view.project(scene.worldStart));
+    const right =
+      scene.index === 23
+        ? WIDTH
+        : Math.min(WIDTH, view.project(scene.worldEnd));
+    if (right <= left) return;
     ctx.save();
     ctx.beginPath();
-    ctx.rect(
-      Math.max(0, left),
-      0,
-      Math.min(WIDTH, right) - Math.max(0, left),
-      HEIGHT,
-    );
+    ctx.rect(left, 0, right - left, HEIGHT);
     ctx.clip();
-    drawPlaceholder(ctx, scene, camera);
-    ctx.save();
-    ctx.globalAlpha = 0.1;
-    ctx.fillStyle = scene.ink;
-    ctx.beginPath();
-    ctx.ellipse(ANCHOR + 4, GROUND + 8, 67, 8, 0, 0, Math.PI * 2);
-    ctx.fill();
+    run();
     ctx.restore();
-    drawWalker(ctx, pose, scene, camera, rig);
+  };
+  // Keep the active artwork opaque. Only the adjoining side of a frame changes
+  // material, so a wide landscape never fades into several narrow era strips.
+  paintScene(active, view, t, pose);
+  const local = t - active.start,
+    window = 0.85;
+  const previous = SCENES[active.index - 1],
+    next = SCENES[active.index + 1];
+  if (previous && local < window) {
+    const edge = Math.min(WIDTH, Math.max(0, view.project(active.worldStart)));
+    ctx.save();
+    ctx.globalAlpha = 1 - smooth(local / window);
+    ctx.beginPath();
+    ctx.rect(0, 0, edge, HEIGHT);
+    ctx.clip();
+    paintScene(previous, view, t, pose);
     ctx.restore();
   }
-  for (const scene of SCENES) drawPortal(ctx, scene.worldStart - camera, scene);
-  if (titles) title(sceneAt(t));
+  if (next && active.end - t < window) {
+    const edge = Math.min(WIDTH, Math.max(0, view.project(active.worldEnd)));
+    ctx.save();
+    ctx.globalAlpha = smooth((t - active.end + window) / window);
+    ctx.beginPath();
+    ctx.rect(edge, 0, WIDTH - edge, HEIGHT);
+    ctx.clip();
+    paintScene(next, view, t, pose);
+    ctx.restore();
+  }
+  for (const scene of SCENES)
+    clipScene(scene, () => {
+      ctx.save();
+      projectContext(ctx, view);
+      ctx.globalAlpha = 0.1;
+      ctx.fillStyle = scene.ink;
+      ctx.beginPath();
+      ctx.ellipse(ANCHOR + 4, GROUND + 8, 67, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      drawWalker(ctx, pose, scene, view.camera, rig);
+      ctx.restore();
+    });
+  for (const scene of SCENES) {
+    if (scene.index === 0 || Math.abs(t - scene.start) > 0.85) continue;
+    drawBoundary(
+      ctx,
+      view.project(scene.worldStart),
+      scene,
+      SCENES[scene.index - 1],
+    );
+  }
+  if (active.id === "renewal" && t > active.end - 1.4) {
+    ctx.save();
+    ctx.globalAlpha = smooth((t - active.end + 1.4) / 0.6);
+    renewalPortal(ctx, view.project(active.worldEnd + 120), true);
+    ctx.restore();
+  }
+  if (titles) title(active);
   paperTexture(ctx, WIDTH, HEIGHT);
 }
 function intro(t) {
@@ -153,7 +219,7 @@ function intro(t) {
     const progress = smooth((t - 4) / 1);
     ctx.save();
     ctx.globalAlpha = smooth((t - 4.5) / 0.5);
-    drawPlaceholder(ctx, SCENES[0], -ANCHOR);
+    paintScene(SCENES[0], viewAt(t), t, poseAt(t), false);
     ctx.restore();
     ctx.save();
     ctx.globalAlpha = progress;
@@ -173,8 +239,15 @@ function tile(scene) {
       scene.index === 23 ? OUTRO - 1 / 60000 : scene.start + 2.3,
     ),
     camera = pose.rootX - ANCHOR;
-  drawPlaceholder(ctx, scene, camera);
+  const sample = scene.index === 23 ? scene.start + 6 : scene.start + 2.3;
+  const view = viewAt(
+    scene.index === 23 ? OUTRO - 1 / 60000 : scene.start + 2.3,
+  );
+  paintScene(scene, view, sample, pose);
+  ctx.save();
+  projectContext(ctx, view);
   drawWalker(ctx, pose, scene, camera);
+  ctx.restore();
   ctx = old;
   tiles.set(scene.id, canvas);
   return canvas;
@@ -282,6 +355,12 @@ function outro(t) {
   );
   ctx.restore();
   ctx.restore();
+  if (u < 0.6) {
+    ctx.save();
+    ctx.globalAlpha = 1 - smooth(u / 0.6);
+    scroll(OUTRO - 1 / 60000, { titles: false, rig: false });
+    ctx.restore();
+  }
   ctx.save();
   ctx.textAlign = "center";
   if (u < 4)
@@ -309,7 +388,8 @@ export function renderAt(t) {
   else outro(t);
   ctx.restore();
 }
-export function mountFilm(parent) {
+export async function mountFilm(parent) {
+  await preloadArt();
   instance = new p5((p) => {
     p.setup = () => {
       const canvas = p.createCanvas(1920, 1080);

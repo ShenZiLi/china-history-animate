@@ -17,7 +17,9 @@ import {
   contactEvents,
   outroWalkTime,
 } from "../beat/timeline.js";
-import { poseAt, poseAtWalkTime } from "../rig/walker.js";
+import { poseAtWalkTime } from "../rig/walker.js";
+import { performanceAt as poseAt, viewAt, REFINED } from "./choreography.js";
+import { artManifest } from "../kit/media.js";
 
 const $ = (s) => document.querySelector(s);
 const chapters = [
@@ -34,7 +36,7 @@ const chapters = [
 $("#chapter-list").innerHTML = chapters
   .map(
     (s, i) =>
-      `<button data-chapter="${s.id}" data-time="${s.start}" class="chapter"><span class="chapter-number">${i === 0 ? "序" : i === 25 ? "尾" : String(i).padStart(2, "0")}</span><span class="chapter-name">${s.name}${s.speculative ? "<small>艺术想象</small>" : ""}</span><span class="chapter-time">${timecode(s.start)}</span></button>`,
+      `<button data-chapter="${s.id}" data-time="${s.start}" class="chapter"><span class="chapter-number">${i === 0 ? "序" : i === 25 ? "尾" : String(i).padStart(2, "0")}</span><span class="chapter-name">${s.name}${REFINED.includes(s.id) ? `<small>精作${s.speculative ? " · 艺术想象" : ""}</small>` : s.speculative ? "<small>艺术想象</small>" : ""}</span><span class="chapter-time">${timecode(s.start)}</span></button>`,
   )
   .join("");
 let time = 0,
@@ -161,16 +163,18 @@ document.addEventListener("visibilitychange", () => {
 });
 if (new URLSearchParams(location.search).has("export"))
   document.body.classList.add("export");
-mountFilm("film");
+await mountFilm("film");
 await ready;
 render(Number(new URLSearchParams(location.search).get("t") ?? 0));
 window.film = {
+  artManifest,
   ready: true,
   renderAt(t) {
     pause();
     render(t);
   },
   poseAt,
+  viewAt,
   scenes: SCENES,
   duration: DURATION,
   contacts: contactEvents(),

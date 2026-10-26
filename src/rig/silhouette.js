@@ -34,8 +34,12 @@ function limb(path, a, b, ra, rb) {
 function between(a, b, u) {
   return { x: mix(a.x, b.x, u), y: mix(a.y, b.y, u) };
 }
-function armShape(path, arm) {
-  const cuff = between(arm.shoulder, arm.elbow, 0.86);
+function armShape(path, arm, style) {
+  const cuff = between(
+    arm.shoulder,
+    arm.elbow,
+    style.garment === "hide" ? 0.38 : 0.86,
+  );
   limb(path, arm.shoulder, cuff, 17, 12);
   limb(path, cuff, arm.elbow, 10.5, 10);
   limb(path, arm.elbow, arm.hand, 10, 7);
@@ -70,7 +74,10 @@ function bodyShape(path, pose, style) {
   path.moveTo(s.x + 14, s.y - 8);
   path.bezierCurveTo(s.x + 28, s.y + 3, s.x + 26, s.y + 31, h.x + 23, h.y - 15);
   path.lineTo(h.x + 32 + sway, h.y + hem);
-  path.quadraticCurveTo(h.x, h.y + hem + 5, h.x - 31 + sway, h.y + hem);
+  if (style.garment === "hide") {
+    for (let i = 1; i <= 7; i++)
+      path.lineTo(h.x + 32 + sway - i * 9, h.y + hem + (i % 2 ? 5 : -1));
+  } else path.quadraticCurveTo(h.x, h.y + hem + 5, h.x - 31 + sway, h.y + hem);
   path.lineTo(h.x - 25, h.y - 9);
   path.bezierCurveTo(s.x - 33, s.y + 25, s.x - 30, s.y + 1, s.x - 17, s.y - 9);
   path.closePath();
@@ -189,12 +196,18 @@ export function drawSilhouette(ctx, pose, style, camera = 0) {
   ctx.translate(-camera, 0);
   ctx.fillStyle = style.ink;
   const shape = new Path2D();
-  armShape(shape, pose.arms[1]);
+  armShape(shape, pose.arms[1], style);
   legShape(shape, pose.legs[1]);
   legShape(shape, pose.legs[0]);
   bodyShape(shape, pose, style);
-  armShape(shape, pose.arms[0]);
-  headShape(shape, pose, style);
+  armShape(shape, pose.arms[0], style);
+  const headPath = new Path2D();
+  headShape(headPath, pose, style);
+  const headMatrix = new DOMMatrix()
+    .translate(pose.head.x, pose.head.y)
+    .rotate(((pose.headTilt ?? 0) * 180) / Math.PI)
+    .translate(-pose.head.x, -pose.head.y);
+  shape.addPath(headPath, headMatrix);
   ctx.fill(shape);
   texture(ctx, shape, pose, style);
   ctx.fillStyle = style.accentColor;

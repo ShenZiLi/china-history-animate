@@ -12,6 +12,7 @@
     "preview": "vite preview --host 127.0.0.1",
     "test": "node --test tests/*.test.mjs",
     "capture": "node tools/capture.mjs",
+    "capture:stage2": "node tools/stage-two.mjs",
     "render": "node tools/render.mjs",
     "verify": "node tools/verify.mjs"
   },

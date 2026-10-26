@@ -90,7 +90,7 @@ await withFilm(async ({ page, errors, browser }) => {
     `${dest}.json`,
     JSON.stringify(
       {
-        stage: 1,
+        stage: Number(cli.stage ?? 1),
         silent: true,
         fps,
         from,

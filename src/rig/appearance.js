@@ -1,7 +1,7 @@
 // C is the invariant character design. Era adapters change the drawing medium,
 // garment envelope and cloth accent, never the joint positions or face profile.
 const eras = [
-  ["rock", "#83482f", "tunic", "waist", "crop"],
+  ["rock", "#743d25", "hide", "waist", "crop"],
   ["pottery", "#392f29", "tunic", "waist", "crop"],
   ["bronze", "#334d43", "tunic", "waist", "tied"],
   ["silk", "#403e31", "long", "waist", "tied"],

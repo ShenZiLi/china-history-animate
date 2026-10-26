@@ -89,8 +89,15 @@ export function poseAtWalkTime(walkTime, ground = () => GROUND) {
   return { rootX, hip, shoulder, head, legs, arms, walkTime };
 }
 
-export function drawWalker(ctx, pose, scene, camera = 0, debug = false) {
-  drawSilhouette(ctx, pose, appearanceFor(scene), camera);
+export function drawWalker(
+  ctx,
+  pose,
+  scene,
+  camera = 0,
+  debug = false,
+  styleOverride = null,
+) {
+  drawSilhouette(ctx, pose, styleOverride ?? appearanceFor(scene), camera);
   if (!debug) return;
   ctx.save();
   ctx.translate(-camera, 0);
