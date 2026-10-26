@@ -15,7 +15,11 @@ The animation, character rig, timing system, scene placeholders, and project-spe
 - **Chrome for Testing**, downloaded by Puppeteer — used as an external rendering tool; not committed or included in the built site. Its actual version is recorded by capture and verification outputs.
 - **ffmpeg** — externally installed encoder, not redistributed. The development machine reports 8.1.2 with GPL components enabled. <https://ffmpeg.org/legal.html>.
 
-Exact direct and transitive dependency versions are recorded in `package-lock.json`; each installed package retains its own license and notices. No external images, recordings, music, sound effects, logos, or voice samples are used in the film. Stage 1 is silent. The four character direction boards under `design/character-concepts/` were generated using the built-in imagegen tool at the user's request; they are design references and are not embedded as frames in the animation.
+Exact direct and transitive dependency versions are recorded in `package-lock.json`; each installed package retains its own license and notices. No stock footage, recordings, music, sound effects, logos, or voice samples are imported. The current preview is silent.
+
+At the user's explicit request, stage 2 uses original background, transparent foreground and gateway layers generated with the built-in imagegen tool. These local assets are under `public/assets/scenes/`; per-scene prompts, production boundaries and asset records are in `briefs/`. Generated environments are combined with deterministic code animation and the shared procedural character rig. No historical painting scan, museum photograph or reference film frame was imported.
+
+The four character direction boards under `design/character-concepts/` were also generated using built-in imagegen at the user's request. They remain design references; the character is drawn from code and these boards are not embedded as animation frames.
 
 ## Reference reading
 

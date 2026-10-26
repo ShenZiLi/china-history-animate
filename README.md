@@ -2,9 +2,9 @@
 
 《一步千年》：同一位普通行者，沿同一条路走过中国的过去、今天与想象中的未来。
 
-当前为 **阶段 1 无声结构预演**，总长 191 秒。24 个时代背景均为标名占位画面，用于验收步态、连续道路、穿框和 5 × 5 结尾展墙；最终场景美术与声音尚未制作。
+当前为 **阶段 2：三个代表场景精作**，全片总长仍为 191 秒。旧石器、北宋和山河新生分别由独立分场代理制作，使用本地 imagegen 背景／透明前景图层与代码动效。其余 21 个时代仍为标名占位，配乐与脚步声音尚未制作。
 
-人物已按用户选定的 **C 水墨剪影** 修订，保留厚实身形与劳动者气质，并随时代切换绘画材料和服饰轮廓。人物方案见 [人物剪影方案](docs/人物剪影方案.md)；运行 `node tools/review-character.mjs` 可生成全景与近景并列的 12 秒动作预演。
+人物已按用户选定的 **C 水墨剪影** 修订并通过验收，保留厚实身形与劳动者气质，并随时代切换绘画材料和服饰轮廓。人物方案见 [人物剪影方案](docs/人物剪影方案.md)。24 个时代的专属代理安排见 [分场代理清单](docs/分场代理制作清单.md)。
 
 ## 预览
 
@@ -24,6 +24,9 @@ npm test
 npm run build
 npm run verify
 npm run capture
+npm run capture:stage2
+npm run verify -- --deep --out out/stage-2
+npm run render -- --stage 2 --fps 30 --out out/stage-2/full-demo-30fps.mp4
 npm run render -- --fps 30 --out out/stage-1/stage-1-30fps.mp4
 npm run render -- --fps 30 --from 8 --to 12 --out out/stage-1/compare-30fps.mp4
 npm run render -- --fps 60 --from 8 --to 12 --out out/stage-1/compare-60fps.mp4
@@ -34,6 +37,8 @@ npm run render -- --fps 60 --from 8 --to 12 --out out/stage-1/compare-60fps.mp4
 画面按 `from + frame / fps` 取样，结束时间不包含在内。完整 30fps 共 5730 帧，60fps 共 11460 帧。30fps 当前仅为结构预演版本；正式帧率在动态对比与反馈后确认。
 
 `verify` 检查乱序跳转后画面哈希、24 段寻址、展墙边界和浏览器异常。单元测试检查累计时间、左右脚触地、支撑脚锁定与骨骼连续性，不替代人工观看动作。
+
+阶段 2 的 `--deep` 另检查 33 个时间点及图层预载；跨石、低头影子与道路记忆有独立运动检查。浏览器 ready 前会等待本地全部绘画层完成加载，导出不依赖远程图像服务。原阶段 1 与 C 人物修订的视频保留在各自 `out/` 子目录作为对照。
 
 ## 规范
 
@@ -46,12 +51,15 @@ npm run render -- --fps 60 --from 8 --to 12 --out out/stage-1/compare-60fps.mp4
 
 - `src/beat/`：统一时间表、节拍和触地事件。
 - `src/rig/`：共享骨骼、足部约束、两段腿部求解与服饰绘制。
-- `src/kit/`：固定种子纹理、路径和文字工具。
-- `src/scenes/`：当前为阶段 1 通用占位景；后续拆分独立美术场景。
+- `src/kit/`：固定种子纹理、路径、文字与本地图层预载工具。
+- `src/scenes/`：三个独立精作场景和其余时代的结构占位。
+- `public/assets/scenes/`：各场景的本地生成背景、透明前景与门框图层。
+- `briefs/`：各时代自己的美术依据、镜头动作、原始图像提示词与资产清单。
 - `src/main/`：纯时间画面、连续卷轴、开场、展墙和预览操作。
 - `tools/`：逐帧采集、接触表、验证和 MP4 导出。
 - `tests/`：时间轴与运动不变量检查。
 - `docs/`：原始提示词、制作计划、参考授权与阶段验收记录。
 - `out/stage-1/`：本机生成的演示视频、图片与验证结果，不提交 Git，可用命令重建。
+- `out/stage-2/`：阶段 2 的进出转场接触表、分段演示与全长无声预演。
 
 创作要求见 [提示词](docs/提示词.md)，分阶段安排见 [制作计划](docs/制作计划.md)，依赖及素材说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
