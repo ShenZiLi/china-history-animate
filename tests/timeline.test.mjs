@@ -12,7 +12,7 @@ import {
   GROUND,
   outroWalkTime,
 } from "../src/beat/timeline.js";
-import { poseAt, poseAtWalkTime, footAt } from "../src/rig/walker.js";
+import { poseAt, poseAtWalkTime, footAt, STANCE } from "../src/rig/walker.js";
 
 test("24 段累计时间覆盖 191 秒，六个未来段使用各自小节数", () => {
   assert.equal(SCENES.length, 24);
@@ -45,7 +45,7 @@ test("支撑脚世界坐标不变，摆腿回到下一次接触点", () => {
     for (let cycle = -2; cycle < 15; cycle++) {
       const base = cycle + side * 0.5;
       const start = footAt(base + 0.01, side);
-      for (let dt = 0.02; dt < 0.62; dt += 0.01) {
+      for (let dt = 0.02; dt < STANCE; dt += 0.01) {
         const f = footAt(base + dt, side);
         assert.equal(f.planted, true);
         assert.equal(f.x, start.x);
@@ -108,4 +108,23 @@ test("Outro 收束时支撑脚固定，最后一帧另一只脚尚未落地", ()
   assert.equal(last.legs[0].foot.y, GROUND);
   assert.equal(last.legs[1].foot.planted, false);
   assert(last.legs[1].foot.y < GROUND - 20);
+});
+test("脚掌由跟着地过渡到前掌蹬离，足部姿态在触地时连续", () => {
+  const landing = footAt(0, 0),
+    flat = footAt(0.2, 0),
+    leaving = footAt(STANCE - 1e-7, 0);
+  assert.equal(landing.heelLift, 0);
+  assert.equal(landing.toeLift, 10);
+  assert.equal(flat.heelLift, 0);
+  assert.equal(flat.toeLift, 0);
+  assert(leaving.heelLift > 5.9);
+  assert.equal(leaving.toeLift, 0);
+  const before = footAt(1 - 1e-7, 0);
+  assert(Math.abs(before.toeLift - landing.toeLift) < 0.001);
+  for (let t = 0; t < 1; t += 1 / 120) {
+    const p = poseAtWalkTime(t),
+      foot = p.legs.find((l) => l.foot.planted);
+    assert(foot);
+    assert(foot.hip.y < GROUND - 145, "承重阶段不应长期蹲行");
+  }
 });

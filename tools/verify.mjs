@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { writeFile, mkdir } from "node:fs/promises";
-import { withFilm, frame } from "./browser.mjs";
+import { resolve } from "node:path";
+import { withFilm, frame, args } from "./browser.mjs";
 import { SCENES } from "../src/beat/timeline.js";
 const hash = (x) => createHash("sha256").update(x).digest("hex");
+const output = resolve(args().out ?? "out/stage-1");
 await withFilm(async ({ page, errors, browser }) => {
   const results = [];
   for (const t of [
@@ -33,9 +35,9 @@ await withFilm(async ({ page, errors, browser }) => {
     SCENES.map((s) => s.name),
   );
   assert.deepEqual(errors, []);
-  await mkdir("out/stage-1", { recursive: true });
+  await mkdir(output, { recursive: true });
   await writeFile(
-    "out/stage-1/verification.json",
+    resolve(output, "verification.json"),
     JSON.stringify(
       {
         browser: await browser.version(),
